@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>הרפתקת המתמטיקה - מיינקראפט כיתה ג'</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --mc-grass: #55aa55;
+            --mc-grass-dark: #3b7a3b;
+            --mc-dirt: #8b5a2b;
+            --mc-dirt-dark: #5c3a1a;
+            --mc-stone: #8a8a8a;
+            --mc-stone-dark: #585858;
+            --mc-wood: #b8864b;
+            --mc-wood-dark: #7a5429;
+            --mc-diamond: #4deeea;
+            --mc-emerald: #17dd62;
+            --mc-gold: #ffd700;
+            --mc-ui-bg: #c6c6c6;
+            --mc-ui-border-light: #ffffff;
+            --mc-ui-border-dark: #555555;
+        }
+
+        body {
+            font-family: 'Rubik', sans-serif;
+            background-color: #2b2b2b;
+            background-image: 
+                linear-gradient(45deg, rgba(0,0,0,0.15) 25%, transparent 25%), 
+                linear-gradient(-45deg, rgba(0,0,0,0.15) 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, rgba(0,0,0,0.15) 75%), 
+                linear-gradient(-45deg, transparent 75%, rgba(0,0,0,0.15) 75%);
+            background-size: 32px 32px;
+            background-position: 0 0, 0 16px, 16px -16px, -16px 0;
+            user-select: none;
+            overflow-x: hidden;
+        }
+
+        /* Minecraft Blocky UI Panel */
+        .mc-panel {
+            background-color: var(--mc-ui-bg);
+            border: 4px solid #1e1e1e;
+            box-shadow: 
+                inset 4px 4px 0px var(--mc-ui-border-light),
+                inset -4px -4px 0px var(--mc-ui-border-dark),
+                0 8px 0 rgba(0,0,0,0.4);
+            border-radius: 6px;
+        }
+
+        .mc-panel-dark {
+            background-color: #373737;
+            border: 4px solid #1a1a1a;
+            box-shadow: 
+                inset 4px 4px 0px #525252,
+                inset -4px -4px 0px #222222;
+            color: #ffffff;
+            border-radius: 6px;
+        }
+
+        /* Minecraft 3D Pixel Buttons */
+        .mc-btn {
+            position: relative;
+            background-color: #7d7d7d;
+            color: white;
+            font-weight: 700;
+            text-shadow: 2px 2px 0px #222222;
+            border: 3px solid #1e1e1e;
+            box-shadow: 
+                inset 3px 3px 0px rgba(255,255,255,0.45),
+                inset -3px -3px 0px rgba(0,0,0,0.45),
+                0 4px 0 #1e1e1e;
+            transition: transform 0.08s ease, filter 0.1s ease;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .mc-btn:hover:not(:disabled) {
+            filter: brightness(1.1);
+        }
+
+        .mc-btn:active:not(:disabled) {
+            transform: translateY(3px);
+            box-shadow: 
+                inset 3px 3px 0px rgba(255,255,255,0.3),
+                inset -3px -3px 0px rgba(0,0,0,0.5),
+                0 1px 0 #1e1e1e;
+        }
+
+        .mc-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .mc-btn-green { background-color: #4aa02c; }
+        .mc-btn-gold { background-color: #d4a017; }
+        .mc-btn-diamond { background-color: #20b2aa; }
+        .mc-btn-red { background-color: #c9302c; }
+        .mc-btn-blue { background-color: #337ab7; }
+
+        /* Minecraft Input Slot */
+        .mc-slot {
+            background-color: #8b8b8b;
+            border: 3px solid #1e1e1e;
+            box-shadow: 
+                inset 3px 3px 0px #373737,
+                inset -3px -3px 0px #ffffff;
+            color: #ffffff;
+            font-weight: 800;
+            text-shadow: 2px 2px 0px #222222;
+            border-radius: 4px;
+            text-align: center;
+            outline: none;
+            transition: background-color 0.2s;
+        }
+
+        .mc-slot:focus {
+            background-color: #9e9e9e;
+            box-shadow: 
+                inset 3px 3px 0px #222222,
+                inset -3px -3px 0px #ffd700,
+                0 0 0 3px #ffd700;
+        }
+
+        .mc-slot.correct {
+            background-color: #3b8c3b !important;
+            box-shadow: inset 3px 3px 0px #1e4d1e, inset -3px -3px 0px #70db70 !important;
+        }
+
+        .mc-slot.wrong {
+            background-color: #a83232 !important;
+            box-shadow: inset 3px 3px 0px #591616, inset -3px -3px 0px #ff7575 !important;
+        }
+
+        /* Grass Top Banner */
+        .grass-header {
+            background: linear-gradient(to bottom, #55aa55 0%, #55aa55 70%, #8b5a2b 70%, #8b5a2b 100%);
+            border-bottom: 4px solid #3a2310;
+        }
+
+        /* XP Bar */
+        .xp-bar-container {
+            background-color: #1e1e1e;
+            border: 3px solid #000000;
+            height: 20px;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .xp-bar-fill {
+            background: linear-gradient(to bottom, #80ff20 0%, #45b300 100%);
+            height: 100%;
+            transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: inset 0 2px 0 rgba(255,255,255,0.5);
+        }
+
+        /* Animations */
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-60px) scale(1.3); }
+        }
+
+        .xp-particle {
+            position: fixed;
+            pointer-events: none;
+            font-weight: 900;
+            color: #80ff20;
+            text-shadow: 2px 2px 0 #000;
+            animation: floatUp 1s ease-out forwards;
+            z-index: 9999;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+
+        .animate-shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        @keyframes bounceBlock {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+
+        .animate-block {
+            animation: bounceBlock 2s infinite ease-in-out;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #2b2b2b; }
+        ::-webkit-scrollbar-thumb { background: #666; border: 2px solid #222; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between text-gray-900">
+
+    <!-- Top HUD Bar -->
+    <header class="grass-header px-3 py-3 shadow-lg sticky top-0 z-40">
+        <div class="max-w-4xl mx-auto flex flex-wrap items-center justify-between gap-2">
+            <!-- Title & Avatar -->
+            <div class="flex items-center gap-2 bg-black/50 px-3 py-1.5 rounded border-2 border-black/70 text-white">
+                <span id="hud-avatar" class="text-2xl">⛏️</span>
+                <div>
+                    <h1 class="font-black text-base sm:text-lg leading-tight tracking-wide text-yellow-300 drop-shadow">מיינקראפט מתמטיקה - כיתה ג'</h1>
+                    <p id="hud-world-name" class="text-xs text-green-300 font-semibold">מוכנים להרפתקה!</p>
+                </div>
+            </div>
+
+            <!-- Stats & Sound Toggle -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                <!-- Emeralds Counter -->
+                <div class="flex items-center gap-1.5 bg-black/60 px-3 py-1.5 rounded border-2 border-emerald-500/70 text-white" title="אמרלדים שנאספו">
+                    <span class="text-lg">💎</span>
+                    <span id="hud-score" class="font-black text-emerald-400 text-base sm:text-lg">0</span>
+                </div>
+
+                <!-- Level Badge -->
+                <div class="flex items-center gap-1 bg-black/60 px-3 py-1.5 rounded border-2 border-lime-400/70 text-white">
+                    <span class="text-xs text-gray-300">רמה</span>
+                    <span id="hud-level" class="font-black text-lime-400 text-base sm:text-lg">1</span>
+                </div>
+
+                <!-- Sound Toggle -->
+                <button id="btn-sound" onclick="toggleSound()" class="mc-btn px-3 py-1.5 text-lg" title="השתק / הפעל צלילים">
+                    🔊
+                </button>
+
+                <!-- Home Button -->
+                <button id="btn-home" onclick="goHome()" class="mc-btn mc-btn-red px-3 py-1.5 text-sm hidden">
+                    🏠 ראשי
+                </button>
+            </div>
+        </div>
+
+        <!-- XP Progress Bar -->
+        <div id="hud-xp-wrapper" class="max-w-4xl mx-auto mt-2 hidden">
+            <div class="flex justify-between text-xs font-bold text-white drop-shadow mb-0.5 px-1">
+                <span id="hud-progress-text">משימה 1 מתוך 14</span>
+                <span id="hud-xp-text">0 XP</span>
+            </div>
+            <div class="xp-bar-container">
+                <div id="xp-bar-fill" class="xp-bar-fill" style="width: 0%;"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Game Container -->
+    <main class="flex-grow flex items-center justify-center p-3 sm:p-6">
+        <div id="game-container" class="w-full max-w-3xl">
+            <!-- Dynamic Content Injected Here -->
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center text-gray-400 text-xs py-3 bg-black/40 border-t border-white/10">
+        מבוסס על חוברת החזרה למבחן במתמטיקה לכיתה ג' • נבנה באהבה בסגנון מיינקראפט 🟩🟫💎
+    </footer>
+
+    <script>
+        /* ==========================================================================
+           1. WEB AUDIO API SYNTHESIZER (8-Bit / Minecraft Sound Effects)
+           ========================================================================== */
+        let audioCtx = null;
+        let isMuted = false;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function toggleSound() {
+            isMuted = !isMuted;
+            const btn = document.getElementById('btn-sound');
+            btn.textContent = isMuted ? '🔇' : '🔊';
+            if (!isMuted) {
+                initAudio();
+                playSound('click');
+            }
+        }
+
+        function playSound(type) {
+            if (isMuted) return;
+            try {
+                initAudio();
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'click') {
+                    // Block tap / UI click
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(320, now);
+                    osc.frequency.exponentialRampToValueAtTime(160, now + 0.06);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.06);
+                    osc.start(now);
+                    osc.stop(now + 0.06);
+                } else if (type === 'xp') {
+                    // Classic XP Orb high chime
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(880, now);
+                    osc.frequency.setValueAtTime(1318.5, now + 0.08);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                } else if (type === 'wrong') {
+                    // Minecraft damage / anvil thud
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(140, now);
+                    osc.frequency.linearRampToValueAtTime(75, now + 0.25);
+                    gain.gain.setValueAtTime(0.25, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } else if (type === 'hint') {
+                    // Potion / Enchantment sparkle
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.setValueAtTime(659.25, now + 0.07);
+                    osc.frequency.setValueAtTime(783.99, now + 0.14);
+                    gain.gain.setValueAtTime(0.18, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } else if (type === 'levelup') {
+                    // Level up fanfare
+                    const notes = [523.25, 659.25, 783.99, 1046.50];
+                    notes.forEach((freq, idx) => {
+                        const o = audioCtx.createOscillator();
+                        const g = audioCtx.createGain();
+                        o.type = 'square';
+                        o.connect(g);
+                        g.connect(audioCtx.destination);
+                        o.frequency.setValueAtTime(freq, now + idx * 0.1);
+                        g.gain.setValueAtTime(0.15, now + idx * 0.1);
+                        g.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.1 + 0.25);
+                        o.start(now + idx * 0.1);
+                        o.stop(now + idx * 0.1 + 0.25);
+                    });
+                }
+            } catch (e) {
+                console.warn('Audio playback skipped:', e);
+            }
+        }
+
+        function spawnXPParticles(text = '+100 XP 💎') {
+            const el = document.createElement('div');
+            el.className = 'xp-particle text-xl sm:text-2xl';
+            el.textContent = text;
+            el.style.left = (40 + Math.random() * 20) + 'vw';
+            el.style.top = '45vh';
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 1000);
+        }
+
+        /* ==========================================================================
+           2. GAME STATE & QUESTIONS DATA (Aligned 100% with the Grade 3 Worksheet)
+           ========================================================================== */
+        const state = {
+            character: { name: 'סטיב החוקר', icon: '🧑‍🌾' },
+            mode: 'all', // 'all' or world index
+            activeQuestions: [],
+            currentIndex: 0,
+            score: 0,
+            xp: 0,
+            answeredCurrent: false,
+            hintShown: false,
+            results: [] // { id, title, correct }
+        };
+
+        const characters = [
+            { id: 'steve', name: 'סטיב הכורה', icon: '⛏️', desc: 'מומחה לחציבת מספרים' },
+            { id: 'alex', name: 'אלכס הבנאית', icon: '🏹', desc: 'אלופת הגאומטריה' },
+            { id: 'creeper', name: 'קריפר חברותי', icon: '🟩', desc: 'שומר סודות החישובים' }
+        ];
+
+        const questionsBank = [
+            // Q1: המבנה העשרוני (682)
+            {
+                id: 1,
+                world: 'עולם המספרים 🟩',
+                blockIcon: '🟫',
+                title: 'שאלה 1: חוקרים את הבלוק 682',
+                subtitle: 'המבנה העשרוני (דף 1, תרגיל 1)',
+                type: 'q1_682',
+                hint: '💡 רמז: כשמוסיפים 10, משתנה רק ספרת העשרות! כשמורידים 100, משתנה רק ספרת המאות. מספר זוגי מסתיים בספרה זוגית (2, 6 או 8).',
+                explanation: `
+                    <ul class="list-disc pr-5 space-y-1">
+                        <li><strong>במילים:</strong> שש מאות שמונים ושתיים.</li>
+                        <li><strong>גדול ב־10:</strong> 682 + 10 = <strong>692</strong> (ספרת העשרות גדלה מ-8 ל-9).</li>
+                        <li><strong>קטן ב־100:</strong> 682 - 100 = <strong>582</strong> (ספרת המאות קטנה מ-6 ל-5).</li>
+                        <li><strong>מספר זוגי קטן מ-682 מהספרות 6, 8, 2:</strong> אפשר למשל <strong>628</strong>, <strong>268</strong> או <strong>286</strong> (כולם קטנים מ-682 ומסתיימים בספרה זוגית).</li>
+                    </ul>
+                `
+            },
+            // Q2: ייצוג מספרים (836)
+            {
+                id: 2,
+                world: 'עולם המספרים 🟩',
+                blockIcon: '🪨',
+                title: 'שאלה 2: מפרקים את המספר 836',
+                subtitle: 'ייצוג במבנה העשרוני (דף 1, תרגיל 2)',
+                type: 'mcq',
+                prompt: 'איזה ייצוג מתאים בדיוק למספר <strong>836</strong>?',
+                options: [
+                    { id: 'a', text: 'א. 83 עשרות ו־6 יחידות', correct: true },
+                    { id: 'b', text: 'ב. 83 מאות ו־6 יחידות', correct: false },
+                    { id: 'c', text: 'ג. 8 מאות ו־36 עשרות', correct: false }
+                ],
+                hint: '💡 רמז: בכל 100 יש 10 עשרות! לכן ב-800 יש 80 עשרות. תוסיפו לזה עוד 3 עשרות...',
+                explanation: '83 עשרות שוות ל־830 (83 × 10 = 830). כשמוסיפים 6 יחידות מקבלים: 830 + 6 = <strong>836</strong>! (לעומת זאת, 83 מאות זה 8,300).'
+            },
+            // Q3: השוואת תרגילים ללא חישוב
+            {
+                id: 3,
+                world: 'עולם המספרים 🟩',
+                blockIcon: '🪨',
+                title: 'שאלה 3: מאזני הזהב של מיינקראפט',
+                subtitle: 'השוואת תרגילים (דף 1, תרגיל 3)',
+                type: 'compare',
+                leftExpr: '76 + 245',
+                rightExpr: '76 + 248',
+                correctSign: '<',
+                hint: '💡 רמז: שימו לב שבשני הצדדים מוסיפים את אותו המספר 76! השוו רק בין 245 לבין 248.',
+                explanation: 'אין צורך לחשב עד הסוף! בשני הצדדים מופיע המחובר <strong>76</strong>. מכיוון ש־245 קטן מ־248, התוצאה בצד שמאל קטנה מהתוצאה בצד ימין: <strong>76 + 245 &lt; 76 + 248</strong>.'
+            },
+            // Q4: סדרות וקפיצות שוות
+            {
+                id: 4,
+                world: 'עולם המספרים 🟩',
+                blockIcon: '🟨',
+                title: 'שאלה 4: גשר הקפיצות השוות',
+                subtitle: 'השלמת סדרות (דף 1, תרגיל 4)',
+                type: 'q4_sequences',
+                hint: '💡 רמז: בסדרה הראשונה קופצים קדימה ב־10 בכל צעד (426, 436, 446...). בסדרה השנייה יורדים ב־20 בכל צעד (580, 560, 540...).',
+                explanation: `
+                    <ul class="list-disc pr-5 space-y-1">
+                        <li><strong>סדרה א' (עולה ב-10):</strong> 426, 436, 446, <strong>456, 466, 476</strong>.</li>
+                        <li><strong>סדרה ב' (יורדת ב-20):</strong> לפני 580 נמצא <strong>600</strong> (כי 600 - 20 = 580), ואחרי 540 ממשיכים לרדת ב-20: <strong>520, 500</strong>.</li>
+                    </ul>
+                `
+            },
+            // Q5: הרכבת מספרים תלת-ספרתיים מהספרות 0, 4, 7
+            {
+                id: 5,
+                world: 'עולם המספרים 🟩',
+                blockIcon: '🟨',
+                title: 'שאלה 5: שולחן היצירה (Crafting) - ספרות 0, 4, 7',
+                subtitle: 'הרכבת מספרים תלת-ספרתיים (דף 1, תרגיל 5)',
+                type: 'q5_digits',
+                hint: '💡 רמז: במספר תלת-ספרתי אסור שהספרה 0 תהיה ראשונה (בספרת המאות), כי אז זה מספר דו-ספרתי! התחילו ב-4 או ב-7.',
+                explanation: 'מהספרות 0, 4, 7 ניתן להרכיב בדיוק 4 מספרים תלת-ספרתיים שונים (אסור להתחיל ב-0): <strong>407, 470, 704, 740</strong>.'
+            },
+            // Q6: חיבור, חיסור וכפל
+            {
+                id: 6,
+                world: 'מערת החישובים ⛏️',
+                blockIcon: '⬛',
+                title: 'שאלה 6: כורים יהלומים עם תרגילי חשבון',
+                subtitle: 'חיבור, חיסור וכפל (דף 2, תרגיל 6)',
+                type: 'q6_calc',
+                hint: '💡 רמז: בתרגילי חיבור וחיסור חברו/חסרו יחידות עם יחידות, עשרות עם עשרות ומאות עם מאות. ב-268 + 845 זכרו לבצע המרה (נשא)!',
+                explanation: `
+                    <ul class="list-disc pr-5 space-y-1" dir="ltr">
+                        <li class="text-right">347 + 231 = <strong>578</strong></li>
+                        <li class="text-right">268 + 845 = <strong>1,113</strong> (8+5=13, 60+40+10=110, 200+800+100=1100)</li>
+                        <li class="text-right">600 - 240 = <strong>360</strong> (600 - 200 = 400, 400 - 40 = 360)</li>
+                        <li class="text-right">752 - 138 = <strong>614</strong> (פורטים עשרת: 12-8=4, 40-30=10, 700-100=600)</li>
+                        <li class="text-right">8 × 6 = <strong>48</strong></li>
+                    </ul>
+                `
+            },
+            // Q7: נעלמים
+            {
+                id: 7,
+                world: 'מערת החישובים ⛏️',
+                blockIcon: '💎',
+                title: 'שאלה 7: מפענחים את הבלוקים הנעלמים',
+                subtitle: 'מציאת נעלמים (דף 2, תרגיל 7)',
+                type: 'q7_unknowns',
+                hint: '💡 רמז: כשחסר מספר בחיסור בהתחלה (___ - 27 = 27), מחברים את שני המספרים! כשחסר מחסר (358 - ___ = 206), מחסרים 358 פחות 206.',
+                explanation: `
+                    <ul class="list-disc pr-5 space-y-1">
+                        <li>4 × <strong>7</strong> = 28 (כי 28 ÷ 4 = 7)</li>
+                        <li>35 ÷ <strong>5</strong> = 7 (כי 5 × 7 = 35)</li>
+                        <li>358 - <strong>152</strong> = 206 (כי 358 - 206 = 152)</li>
+                        <li><strong>300</strong> + 46 = 346 (כי 346 - 46 = 300)</li>
+                        <li><strong>54</strong> - 27 = 27 (כי 27 + 27 = 54)</li>
+                    </ul>
+                `
+            },
+            // Q8: שאלה מילולית - סדנת יצירה
+            {
+                id: 8,
+                world: 'כפר השאלות המילוליות 🏘️',
+                blockIcon: '📦',
+                title: 'שאלה 8: סדנת היצירה בכפר',
+                subtitle: 'שאלה מילולית בכפל (דף 3, תרגיל 8)',
+                type: 'q8_stickers',
+                hint: '💡 רמז: יש 24 קבוצות (ילדים), ובכל קבוצה יש 4 מדבקות. כלומר 24 פעמים 4! כפלו 20×4 ועוד 4×4.',
+                explanation: 'כאשר לכל אחד מ־24 הילדים מחלקים 4 מדבקות, הפעולה המתאימה היא כפל: <strong>24 × 4</strong>.<br>חישוב: 20 × 4 = 80, ועוד 4 × 4 = 16 ← ביחד <strong>96 מדבקות</strong>!'
+            },
+            // Q9: שאלה מילולית - העוגיות של דנה
+            {
+                id: 9,
+                world: 'כפר השאלות המילוליות 🏘️',
+                blockIcon: '🍪',
+                title: 'שאלה 9: העוגיות של דנה',
+                subtitle: 'שאלה מילולית בחילוק (דף 3, תרגיל 9)',
+                type: 'q9_cookies',
+                hint: '💡 רמז: דנה מחלקת 30 עוגיות לקבוצות שוות של 5 עוגיות בכל שקית. איזו פעולה מתאימה לחלוקה לקבוצות שוות?',
+                explanation: 'דנה חילקה 30 עוגיות לשקיות שבכל אחת 5 עוגיות, לכן התרגיל הוא: <strong>30 ÷ 5 = 6</strong>.<br>תשובה: דנה השתמשה ב־<strong>6 שקיות</strong>.'
+            },
+            // Q10: השוואת תרגילי כפל
+            {
+                id: 10,
+                world: 'כפר השאלות המילוליות 🏘️',
+                blockIcon: '⚖️',
+                title: 'שאלה 10: קרב הכפולות',
+                subtitle: 'השוואת תרגילים (דף 3, תרגיל 10)',
+                type: 'q10_mult_compare',
+                hint: '💡 רמז: זכרו את חוק החילוף בכפל (5×20 זהה ל-20×5). בתרגיל השני חשבו: כמה זה 4×7 וכמה זה 3×9?',
+                explanation: `
+                    <ul class="list-disc pr-5 space-y-1">
+                        <li><strong>5 × 20 = 20 × 5</strong> (לפי חוק החילוף בכפל, שניהם שווים ל־100).</li>
+                        <li><strong>4 × 7 &gt; 3 × 9</strong> (כי 4 × 7 = 28, ואילו 3 × 9 = 27, ו־28 גדול מ־27).</li>
+                    </ul>
+                `
+            },
+            // Q11: קריאת דיאגרמת עמודות
+            {
+                id: 11,
+                world: 'כפר השאלות המילוליות 🏘️',
+                blockIcon: '📊',
+                title: 'שאלה 11: מגדלי החוגים של הכיתה',
+                subtitle: 'קריאת דיאגרמת עמודות (דף 3, תרגיל 11)',
+                type: 'q11_chart',
+                hint: '💡 רמז: הסתכלו על גובה העמודה של חוג 1 (ציור) מול המספרים בציר השמאלי. כדי למצוא כמה השתתפו בסך הכול, חברו את כל 3 העמודות!',
+                explanation: `
+                    <ul class="list-disc pr-5 space-y-1">
+                        <li><strong>חוג ציור (עמודה 1):</strong> מגיע עד המספר <strong>8</strong> ילדים.</li>
+                        <li><strong>סך הכול ילדים:</strong> ציור (8) + מוזיקה (6) + ספורט (10) = <strong>24 ילדים</strong>.</li>
+                    </ul>
+                `
+            },
+            // Q12: גאומטריה - זיהוי הזווית הגדולה ביותר
+            {
+                id: 12,
+                world: 'מקדש הגאומטריה 📐',
+                blockIcon: '🧭',
+                title: 'שאלה 12: איזו זווית פתוחה הכי הרבה?',
+                subtitle: 'השוואת זוויות (דף 4, תרגיל 12)',
+                type: 'q12_angles_compare',
+                hint: '💡 רמז: גודל של זווית נקבע לפי המפתח (הפתיחה) בין שתי הקרניים, ולא לפי אורך הקווים! חפשו את הזווית הקהה הפתוחה ביותר.',
+                explanation: 'הזווית הגדולה ביותר היא <strong>זווית מספר 3</strong>! היא זווית קהה (גדולה מזווית ישרה 2) והמפתח בין הקרניים שלה הוא הרחב ביותר מבין כל הזוויות.'
+            },
+            // Q13: גאומטריה - בניית זוויות על רשת נקודות
+            {
+                id: 13,
+                world: 'מקדש הגאומטריה 📐',
+                blockIcon: '✨',
+                title: 'שאלה 13: בונים זוויות על לוח הנקודות',
+                subtitle: 'זווית חדה, ישרה וקהה (דף 4, תרגיל 13)',
+                type: 'q13_angle_grid',
+                hint: '💡 רמז: הקרן הנתונה עולה באלכסון למעלה וימינה. כדי ליצור זווית ישרה (90°), רדו באלכסון למטה וימינה! לזווית חדה בחרו נקודה קרובה יותר, ולזווית קהה בחרו נקודה רחוקה יותר.',
+                explanation: `
+                    <ul class="list-disc pr-5 space-y-1">
+                        <li><strong>זווית חדה:</strong> קטנה מזווית ישרה (למשל חיבור לנקודה העליונה-שמאלית או האמצעית).</li>
+                        <li><strong>זווית ישרה:</strong> יוצרת פינה של ריבוע (90°) - חיבור לנקודה התחתונה-אמצעית יוצר אלכסון מאונך!</li>
+                        <li><strong>זווית קהה:</strong> גדולה מזווית ישרה (פתוחה יותר מ-90°, למשל חיבור לנקודה התחתונה-שמאלית).</li>
+                    </ul>
+                `
+            },
+            // Q14: מדידת אורך בסרגל
+            {
+                id: 14,
+                world: 'מקדש הגאומטריה 📐',
+                blockIcon: '📏',
+                title: 'שאלה 14: מודדים את העיפרון על הסרגל',
+                subtitle: 'מדידת אורך בסנטימטרים (דף 4, תרגיל 14)',
+                type: 'q14_ruler',
+                hint: '💡 רמז: שימו לב! העיפרון לא מתחיל ב־0, אלא מתחיל ב־2 ס"מ ומסתיים ב־8 ס"מ. ספרו כמה קפיצות יש מ-2 עד 8, או בצעו חיסור!',
+                explanation: 'העיפרון מתחיל במספר <strong>2</strong> ומסתיים במספר <strong>8</strong>.<br>לכן החישוב הוא: <strong>8 - 2 = 6</strong>.<br>אורך העיפרון הוא <strong>6 ס"מ</strong>!'
+            }
+        ];
+
+        /* ==========================================================================
+           3. NAVIGATION & HUD UPDATES
+           ========================================================================== */
+        function updateHUD() {
+            document.getElementById('hud-avatar').textContent = state.character.icon;
+            document.getElementById('hud-score').textContent = state.score;
+            const level = Math.floor(state.xp / 300) + 1;
+            document.getElementById('hud-level').textContent = level;
+            document.getElementById('hud-xp-text').textContent = `${state.xp} XP`;
+
+            const xpWrapper = document.getElementById('hud-xp-wrapper');
+            const homeBtn = document.getElementById('btn-home');
+
+            if (state.activeQuestions.length > 0 && state.currentIndex < state.activeQuestions.length) {
+                xpWrapper.classList.remove('hidden');
+                homeBtn.classList.remove('hidden');
+                const q = state.activeQuestions[state.currentIndex];
+                document.getElementById('hud-world-name').textContent = q.world;
+                document.getElementById('hud-progress-text').textContent = `שאלה ${state.currentIndex + 1} מתוך ${state.activeQuestions.length}`;
+                const pct = ((state.currentIndex) / state.activeQuestions.length) * 100;
+                document.getElementById('xp-bar-fill').style.width = `${pct}%`;
+            } else {
+                xpWrapper.classList.add('hidden');
+                if (state.activeQuestions.length === 0) {
+                    homeBtn.classList.add('hidden');
+                    document.getElementById('hud-world-name').textContent = 'בחרו עולם והתחילו לשחק!';
+                }
+            }
+        }
+
+        function goHome() {
+            playSound('click');
+            state.activeQuestions = [];
+            state.currentIndex = 0;
+            renderStartScreen();
+        }
+
+        function startGame(worldFilter = 'all') {
+            playSound('levelup');
+            state.mode = worldFilter;
+            if (worldFilter === 'all') {
+                state.activeQuestions = [...questionsBank];
+            } else {
+                state.activeQuestions = questionsBank.filter(q => q.world.includes(worldFilter));
+            }
+            state.currentIndex = 0;
+            state.score = 0;
+            state.xp = 0;
+            state.results = [];
+            renderQuestion();
+        }
+
+        function selectCharacter(charId) {
+            playSound('click');
+            const found = characters.find(c => c.id === charId);
+            if (found) {
+                state.character = found;
+                renderStartScreen();
+            }
+        }
+
+        /* ==========================================================================
+           4. RENDER START SCREEN
+           ========================================================================== */
+        function renderStartScreen() {
+            updateHUD();
+            const container = document.getElementById('game-container');
+            container.innerHTML = `
+                <div class="mc-panel p-5 sm:p-8 text-center space-y-6">
+                    <!-- Welcome Header -->
+                    <div class="space-y-2">
+                        <div class="inline-block bg-emerald-700 text-white text-xs sm:text-sm font-bold px-3 py-1 rounded border-2 border-black shadow">
+                            חזרה למבחן במתמטיקה • כיתה ג'
+                        </div>
+                        <h2 class="text-2xl sm:text-4xl font-black text-gray-800 tracking-tight">
+                            ברוכים הבאים להרפתקת הבלוקים! ⛏️
+                        </h2>
+                        <p class="text-gray-700 text-sm sm:text-base max-w-xl mx-auto font-medium">
+                            פתרו את כל משימות החשבון והגאומטריה מדף החזרה, אספו אמרלדים 💎, השתמשו ברמזים חכמים והגיעו לרמת מאסטר!
+                        </p>
+                    </div>
+
+                    <!-- Character Selection -->
+                    <div class="mc-panel-dark p-4">
+                        <h3 class="text-yellow-300 font-bold text-base sm:text-lg mb-3">1. בחרו את הדמות שלכם:</h3>
+                        <div class="grid grid-cols-3 gap-2 sm:gap-4">
+                            ${characters.map(c => `
+                                <button onclick="selectCharacter('${c.id}')" 
+                                    class="p-3 rounded border-4 transition-all flex flex-col items-center gap-1 ${state.character.id === c.id ? 'bg-emerald-700 border-yellow-300 scale-105 shadow-lg' : 'bg-gray-700 border-gray-900 opacity-80 hover:opacity-100'}">
+                                    <span class="text-3xl sm:text-4xl">${c.icon}</span>
+                                    <span class="font-bold text-xs sm:text-sm text-white">${c.name}</span>
+                                    <span class="text-[11px] text-gray-300 hidden sm:block">${c.desc}</span>
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- World / Mode Selection -->
+                    <div class="space-y-3">
+                        <h3 class="font-extrabold text-gray-800 text-base sm:text-lg">2. בחרו מצב משחק:</h3>
+                        
+                        <button onclick="startGame('all')" class="mc-btn mc-btn-green w-full py-4 px-6 text-lg sm:text-2xl flex items-center justify-center gap-3">
+                            <span>🚀</span>
+                            <span>התחל הרפתקה מלאה (כל 14 השאלות!)</span>
+                        </button>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2">
+                            <button onclick="startGame('עולם המספרים')" class="mc-btn mc-btn-gold py-3 px-4 text-sm sm:text-base flex items-center justify-center gap-2">
+                                <span>🟩</span>
+                                <span>עולם המספרים וסדרות (שאלות 1-5)</span>
+                            </button>
+                            <button onclick="startGame('מערת החישובים')" class="mc-btn mc-btn-diamond py-3 px-4 text-sm sm:text-base flex items-center justify-center gap-2">
+                                <span>⛏️</span>
+                                <span>מערת החישובים ונעלמים (שאלות 6-7)</span>
+                            </button>
+                            <button onclick="startGame('כפר השאלות')" class="mc-btn mc-btn-blue py-3 px-4 text-sm sm:text-base flex items-center justify-center gap-2">
+                                <span>🏘️</span>
+                                <span>כפר השאלות ודיאגרמה (שאלות 8-11)</span>
+                            </button>
+                            <button onclick="startGame('מקדש הגאומטריה')" class="mc-btn py-3 px-4 text-sm sm:text-base flex items-center justify-center gap-2">
+                                <span>📐</span>
+                                <span>מקדש הגאומטריה וסרגל (שאלות 12-14)</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        /* ==========================================================================
+           5. RENDER QUESTION SCREEN & INTERACTIVE WIDGETS
+           ========================================================================== */
+        let tempSelections = {}; // Holds user choices for clickable widgets
+
+        function renderQuestion() {
+            updateHUD();
+            state.answeredCurrent = false;
+            state.hintShown = false;
+            tempSelections = {};
+
+            const q = state.activeQuestions[state.currentIndex];
+            const container = document.getElementById('game-container');
+
+            container.innerHTML = `
+                <div id="question-card" class="mc-panel p-4 sm:p-7 space-y-5">
+                    <!-- Question Header -->
+                    <div class="flex flex-wrap items-start justify-between gap-2 border-b-4 border-gray-400 pb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gray-800 border-3 border-black rounded flex items-center justify-center text-3xl sm:text-4xl animate-block shadow">
+                                ${q.blockIcon}
+                            </div>
+                            <div>
+                                <span class="text-xs font-bold text-emerald-800 bg-emerald-200 px-2 py-0.5 rounded border border-emerald-600">
+                                    ${q.subtitle}
+                                </span>
+                                <h2 class="text-xl sm:text-2xl font-black text-gray-900 mt-1">${q.title}</h2>
+                            </div>
+                        </div>
+
+                        <!-- Hint Button -->
+                        <button id="btn-hint" onclick="toggleHint()" class="mc-btn mc-btn-gold px-3 py-2 text-sm flex items-center gap-1.5">
+                            <span>💡</span>
+                            <span>רמז</span>
+                        </button>
+                    </div>
+
+                    <!-- Hint Box (Hidden initially) -->
+                    <div id="hint-box" class="hidden bg-amber-100 border-4 border-amber-500 rounded p-3 text-amber-950 font-semibold text-sm sm:text-base shadow-inner">
+                        ${q.hint}
+                    </div>
+
+                    <!-- Interactive Question Body -->
+                    <div id="question-body" class="py-2">
+                        ${buildQuestionBody(q)}
+                    </div>
+
+                    <!-- Feedback & Explanation Box (Hidden until checked) -->
+                    <div id="feedback-box" class="hidden rounded p-4 border-4 space-y-2">
+                        <div id="feedback-header" class="font-black text-lg sm:text-xl flex items-center gap-2"></div>
+                        <div class="bg-white/90 rounded p-3 border-2 border-gray-400 text-gray-900 text-sm sm:text-base">
+                            <div class="font-extrabold text-indigo-800 mb-1">📖 הסבר ודרך פתרון:</div>
+                            <div>${q.explanation}</div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t-4 border-gray-400">
+                        <button id="btn-check" onclick="checkAnswer()" class="mc-btn mc-btn-green flex-grow sm:flex-grow-0 px-8 py-3.5 text-lg">
+                            ✔️ בדוק תשובה!
+                        </button>
+                        <button id="btn-next" onclick="nextQuestion()" class="mc-btn mc-btn-diamond hidden flex-grow sm:flex-grow-0 px-8 py-3.5 text-lg">
+                            המשך לשאלה הבאה ⬅️
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            // Initialize custom canvas/SVG interactions if needed
+            if (q.type === 'q13_angle_grid') {
+                initAngleGrids();
+            }
+        }
+
+        function toggleHint() {
+            playSound('hint');
+            const hintBox = document.getElementById('hint-box');
+            hintBox.classList.toggle('hidden');
+            state.hintShown = true;
+        }
+
+        function buildQuestionBody(q) {
+            switch (q.type) {
+                case 'q1_682':
+                    return `
+                        <div class="space-y-4">
+                            <div class="mc-panel-dark p-4 text-center">
+                                <p class="text-gray-300 text-sm mb-1">המספר הנתון הוא:</p>
+                                <div class="text-4xl sm:text-5xl font-black text-yellow-300 tracking-widest">682</div>
+                                <p class="text-xs text-emerald-300 mt-1">(שש מאות שמונים ושתיים)</p>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div class="bg-white/80 p-3 rounded border-2 border-gray-500 flex flex-col justify-between">
+                                    <label class="font-bold text-gray-800 text-sm mb-2">א. כתבו מספר הגדול ממנו ב־10:</label>
+                                    <input type="number" id="q1_a" class="mc-slot w-full py-2 text-xl" placeholder="?">
+                                </div>
+                                <div class="bg-white/80 p-3 rounded border-2 border-gray-500 flex flex-col justify-between">
+                                    <label class="font-bold text-gray-800 text-sm mb-2">ב. כתבו מספר הקטן ממנו ב־100:</label>
+                                    <input type="number" id="q1_b" class="mc-slot w-full py-2 text-xl" placeholder="?">
+                                </div>
+                                <div class="bg-white/80 p-3 rounded border-2 border-gray-500 flex flex-col justify-between">
+                                    <label class="font-bold text-gray-800 text-sm mb-2">ג. הרכיבו מהספרות 6, 8, 2 מספר זוגי הקטן ממנו:</label>
+                                    <input type="number" id="q1_c" class="mc-slot w-full py-2 text-xl" placeholder="?">
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'mcq':
+                    return `
+                        <div class="space-y-4">
+                            <p class="text-lg font-bold text-gray-800">${q.prompt}</p>
+                            <div class="space-y-2.5">
+                                ${q.options.map(opt => `
+                                    <button onclick="selectMCQ('${opt.id}')" id="mcq-${opt.id}"
+                                        class="mc-btn w-full text-right p-4 text-base sm:text-lg flex items-center justify-between">
+                                        <span>${opt.text}</span>
+                                        <span class="mcq-check text-xl">⬜</span>
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+
+                case 'compare':
+                    return `
+                        <div class="space-y-4 text-center">
+                            <p class="font-bold text-gray-800 text-base sm:text-lg">בחרו את הסימן המתאים (גדול מ־, קטן מ־ או שווה ל־):</p>
+                            <div class="mc-panel-dark p-5 flex flex-wrap items-center justify-center gap-4 sm:gap-6" dir="ltr">
+                                <span class="text-2xl sm:text-3xl font-black text-cyan-300">${q.leftExpr}</span>
+                                <div id="compare-display" class="w-16 h-16 bg-gray-800 border-4 border-yellow-400 rounded flex items-center justify-center text-3xl font-black text-yellow-300">
+                                    ?
+                                </div>
+                                <span class="text-2xl sm:text-3xl font-black text-cyan-300">${q.rightExpr}</span>
+                            </div>
+                            <div class="flex justify-center gap-4 pt-2" dir="ltr">
+                                <button onclick="selectCompare('<')" class="mc-btn mc-btn-blue w-16 h-14 text-2xl font-black">&lt;</button>
+                                <button onclick="selectCompare('=')" class="mc-btn mc-btn-blue w-16 h-14 text-2xl font-black">=</button>
+                                <button onclick="selectCompare('>')" class="mc-btn mc-btn-blue w-16 h-14 text-2xl font-black">&gt;</button>
+                            </div>
+                        </div>
+                    `;
+
+                case 'q4_sequences':
+                    return `
+                        <div class="space-y-5">
+                            <p class="font-bold text-gray-800">השלימו את המספרים החסרים בכל סדרה לפי הקפיצות השוות:</p>
+                            
+                            <!-- Sequence 1 -->
+                            <div class="mc-panel-dark p-4 space-y-2">
+                                <div class="text-xs text-emerald-300 font-bold">סדרה א' (עולים בקפיצות שוות):</div>
+                                <div class="flex flex-wrap items-center justify-center gap-2" dir="ltr">
+                                    <span class="bg-gray-700 px-3 py-2 rounded border-2 border-black font-black text-lg">426</span>
+                                    <span class="bg-gray-700 px-3 py-2 rounded border-2 border-black font-black text-lg">436</span>
+                                    <span class="bg-gray-700 px-3 py-2 rounded border-2 border-black font-black text-lg">446</span>
+                                    <input type="number" id="q4_a1" class="mc-slot w-20 py-2 text-lg" placeholder="?">
+                                    <input type="number" id="q4_a2" class="mc-slot w-20 py-2 text-lg" placeholder="?">
+                                    <input type="number" id="q4_a3" class="mc-slot w-20 py-2 text-lg" placeholder="?">
+                                </div>
+                            </div>
+
+                            <!-- Sequence 2 -->
+                            <div class="mc-panel-dark p-4 space-y-2">
+                                <div class="text-xs text-amber-300 font-bold">סדרה ב' (יורדים בקפיצות שוות):</div>
+                                <div class="flex flex-wrap items-center justify-center gap-2" dir="ltr">
+                                    <input type="number" id="q4_b1" class="mc-slot w-20 py-2 text-lg" placeholder="?">
+                                    <span class="bg-gray-700 px-3 py-2 rounded border-2 border-black font-black text-lg">580</span>
+                                    <span class="bg-gray-700 px-3 py-2 rounded border-2 border-black font-black text-lg">560</span>
+                                    <span class="bg-gray-700 px-3 py-2 rounded border-2 border-black font-black text-lg">540</span>
+                                    <input type="number" id="q4_b2" class="mc-slot w-20 py-2 text-lg" placeholder="?">
+                                    <input type="number" id="q4_b3" class="mc-slot w-20 py-2 text-lg" placeholder="?">
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'q5_digits':
+                    return `
+                        <div class="space-y-4 text-center">
+                            <p class="font-bold text-gray-800 text-base sm:text-lg">
+                                הרכיבו <strong>ארבעה מספרים תלת-ספרתיים שונים</strong> מהספרות:
+                            </p>
+                            <div class="flex justify-center gap-3 my-2" dir="ltr">
+                                <span class="w-14 h-14 bg-amber-600 text-white font-black text-3xl flex items-center justify-center border-4 border-black rounded shadow">0</span>
+                                <span class="w-14 h-14 bg-amber-600 text-white font-black text-3xl flex items-center justify-center border-4 border-black rounded shadow">4</span>
+                                <span class="w-14 h-14 bg-amber-600 text-white font-black text-3xl flex items-center justify-center border-4 border-black rounded shadow">7</span>
+                            </div>
+                            <p class="text-xs text-gray-600 font-semibold">(בכל מספר השתמשו בכל ספרה פעם אחת בלבד)</p>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                                <input type="number" id="q5_1" class="mc-slot py-3 text-xl" placeholder="מספר 1">
+                                <input type="number" id="q5_2" class="mc-slot py-3 text-xl" placeholder="מספר 2">
+                                <input type="number" id="q5_3" class="mc-slot py-3 text-xl" placeholder="מספר 3">
+                                <input type="number" id="q5_4" class="mc-slot py-3 text-xl" placeholder="מספר 4">
+                            </div>
+                        </div>
+                    `;
+
+                case 'q6_calc':
+                    const ex6 = [
+                        { id: 'c1', text: '347 + 231 =' },
+                        { id: 'c2', text: '268 + 845 =' },
+                        { id: 'c3', text: '600 - 240 =' },
+                        { id: 'c4', text: '752 - 138 =' },
+                        { id: 'c5', text: '8 × 6 =' }
+                    ];
+                    return `
+                        <div class="space-y-3">
+                            <p class="font-bold text-gray-800">פתרו את חמשת התרגילים הבאים:</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                ${ex6.map(item => `
+                                    <div class="mc-panel-dark p-3 flex items-center justify-between gap-2" dir="ltr">
+                                        <span class="font-black text-lg sm:text-xl text-cyan-300">${item.text}</span>
+                                        <input type="number" id="q6_${item.id}" class="mc-slot w-24 py-2 text-xl" placeholder="?">
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+
+                case 'q7_unknowns':
+                    return `
+                        <div class="space-y-3">
+                            <p class="font-bold text-gray-800">מצאו את המספר החסר בכל תרגיל:</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" dir="ltr">
+                                <div class="mc-panel-dark p-3 flex items-center justify-center gap-2 text-xl font-black">
+                                    <span>4 ×</span>
+                                    <input type="number" id="q7_1" class="mc-slot w-20 py-1.5 text-xl" placeholder="?">
+                                    <span>= 28</span>
+                                </div>
+                                <div class="mc-panel-dark p-3 flex items-center justify-center gap-2 text-xl font-black">
+                                    <span>35 ÷</span>
+                                    <input type="number" id="q7_2" class="mc-slot w-20 py-1.5 text-xl" placeholder="?">
+                                    <span>= 7</span>
+                                </div>
+                                <div class="mc-panel-dark p-3 flex items-center justify-center gap-2 text-xl font-black">
+                                    <span>358 -</span>
+                                    <input type="number" id="q7_3" class="mc-slot w-20 py-1.5 text-xl" placeholder="?">
+                                    <span>= 206</span>
+                                </div>
+                                <div class="mc-panel-dark p-3 flex items-center justify-center gap-2 text-xl font-black">
+                                    <input type="number" id="q7_4" class="mc-slot w-20 py-1.5 text-xl" placeholder="?">
+                                    <span>+ 46 = 346</span>
+                                </div>
+                                <div class="mc-panel-dark p-3 flex items-center justify-center gap-2 text-xl font-black sm:col-span-2">
+                                    <input type="number" id="q7_5" class="mc-slot w-20 py-1.5 text-xl" placeholder="?">
+                                    <span>- 27 = 27</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'q8_stickers':
+                    return `
+                        <div class="space-y-4">
+                            <div class="bg-blue-100 border-4 border-blue-500 p-4 rounded text-gray-900 font-semibold text-base sm:text-lg">
+                                🎨 בסדנת יצירה השתתפו <strong>24 ילדים</strong>. כל ילד קיבל <strong>4 מדבקות</strong>.
+                            </div>
+
+                            <div class="space-y-2">
+                                <label class="font-bold text-gray-800 block">1. בחרו את התרגיל המתאים למציאת מספר המדבקות שחולקו בסך הכול:</label>
+                                <div class="grid grid-cols-3 gap-2" dir="ltr">
+                                    <button onclick="selectQ8Op('plus')" id="q8-op-plus" class="mc-btn py-3 text-lg sm:text-xl">24 + 4</button>
+                                    <button onclick="selectQ8Op('mult')" id="q8-op-mult" class="mc-btn py-3 text-lg sm:text-xl">24 × 4</button>
+                                    <button onclick="selectQ8Op('div')" id="q8-op-div" class="mc-btn py-3 text-lg sm:text-xl">24 ÷ 4</button>
+                                </div>
+                            </div>
+
+                            <div class="bg-white/80 p-3 rounded border-2 border-gray-500 flex flex-wrap items-center justify-between gap-2">
+                                <label class="font-bold text-gray-800">2. כמה מדבקות חולקו בסך הכול?</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="number" id="q8_total" class="mc-slot w-24 py-2 text-xl" placeholder="?">
+                                    <span class="font-bold">מדבקות</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'q9_cookies':
+                    return `
+                        <div class="space-y-4">
+                            <div class="bg-amber-100 border-4 border-amber-600 p-4 rounded text-gray-900 font-semibold text-base sm:text-lg">
+                                🍪 דנה הכינה <strong>30 עוגיות</strong>. היא ארזה אותן בשקיות ובהן <strong>5 עוגיות</strong> בכל שקית.
+                            </div>
+
+                            <div class="space-y-2">
+                                <label class="font-bold text-gray-800 block">1. בחרו את התרגיל המתאים:</label>
+                                <div class="grid grid-cols-3 gap-2" dir="ltr">
+                                    <button onclick="selectQ9Op('minus')" id="q9-op-minus" class="mc-btn py-3 text-lg sm:text-xl">30 - 5</button>
+                                    <button onclick="selectQ9Op('mult')" id="q9-op-mult" class="mc-btn py-3 text-lg sm:text-xl">30 × 5</button>
+                                    <button onclick="selectQ9Op('div')" id="q9-op-div" class="mc-btn py-3 text-lg sm:text-xl">30 ÷ 5</button>
+                                </div>
+                            </div>
+
+                            <div class="bg-white/80 p-3 rounded border-2 border-gray-500 flex flex-wrap items-center justify-between gap-2">
+                                <label class="font-bold text-gray-800">2. בכמה שקיות השתמשה דנה?</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="number" id="q9_bags" class="mc-slot w-24 py-2 text-xl" placeholder="?">
+                                    <span class="font-bold">שקיות</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'q10_mult_compare':
+                    return `
+                        <div class="space-y-4">
+                            <p class="font-bold text-gray-800">השלימו סימן מתאים (&gt;, &lt; או =) בכל שורה:</p>
+                            
+                            <!-- Row 1 -->
+                            <div class="mc-panel-dark p-4 flex flex-wrap items-center justify-between gap-3" dir="ltr">
+                                <div class="flex items-center gap-3 text-xl sm:text-2xl font-black text-yellow-300">
+                                    <span>5 × 20</span>
+                                    <span id="q10-disp-1" class="w-12 h-12 bg-gray-800 border-2 border-white rounded flex items-center justify-center text-white">?</span>
+                                    <span>20 × 5</span>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button onclick="selectQ10(1, '<')" class="mc-btn mc-btn-blue w-12 h-11 text-xl">&lt;</button>
+                                    <button onclick="selectQ10(1, '=')" class="mc-btn mc-btn-blue w-12 h-11 text-xl">=</button>
+                                    <button onclick="selectQ10(1, '>')" class="mc-btn mc-btn-blue w-12 h-11 text-xl">&gt;</button>
+                                </div>
+                            </div>
+
+                            <!-- Row 2 -->
+                            <div class="mc-panel-dark p-4 flex flex-wrap items-center justify-between gap-3" dir="ltr">
+                                <div class="flex items-center gap-3 text-xl sm:text-2xl font-black text-emerald-300">
+                                    <span>4 × 7</span>
+                                    <span id="q10-disp-2" class="w-12 h-12 bg-gray-800 border-2 border-white rounded flex items-center justify-center text-white">?</span>
+                                    <span>3 × 9</span>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button onclick="selectQ10(2, '<')" class="mc-btn mc-btn-blue w-12 h-11 text-xl">&lt;</button>
+                                    <button onclick="selectQ10(2, '=')" class="mc-btn mc-btn-blue w-12 h-11 text-xl">=</button>
+                                    <button onclick="selectQ10(2, '>')" class="mc-btn mc-btn-blue w-12 h-11 text-xl">&gt;</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'q11_chart':
+                    return `
+                        <div class="space-y-4">
+                            <p class="font-bold text-gray-800">כל ילד בכיתה בחר חוג אחד. התבוננו בדיאגרמת הבלוקים שלפניכם:</p>
+                            
+                            <!-- Visual Minecraft Bar Chart -->
+                            <div class="mc-panel-dark p-4">
+                                <div class="flex items-end justify-around h-48 border-b-4 border-l-4 border-gray-400 px-4 pt-6 relative" dir="ltr">
+                                    <!-- Y-Axis Labels -->
+                                    <div class="absolute left-1 top-2 bottom-0 flex flex-col justify-between text-xs text-gray-300 font-bold py-1">
+                                        <span>12</span><span>10</span><span>8</span><span>6</span><span>4</span><span>2</span><span>0</span>
+                                    </div>
+
+                                    <!-- Bar 1: Art (8) -->
+                                    <div class="flex flex-col items-center w-1/4">
+                                        <span class="text-xs font-bold text-cyan-300 mb-1">8</span>
+                                        <div class="w-12 sm:w-16 bg-cyan-500 border-2 border-black shadow-inner" style="height: 110px;"></div>
+                                    </div>
+
+                                    <!-- Bar 2: Music (6) -->
+                                    <div class="flex flex-col items-center w-1/4">
+                                        <span class="text-xs font-bold text-amber-300 mb-1">6</span>
+                                        <div class="w-12 sm:w-16 bg-amber-500 border-2 border-black shadow-inner" style="height: 82px;"></div>
+                                    </div>
+
+                                    <!-- Bar 3: Sports (10) -->
+                                    <div class="flex flex-col items-center w-1/4">
+                                        <span class="text-xs font-bold text-emerald-300 mb-1">10</span>
+                                        <div class="w-12 sm:w-16 bg-emerald-500 border-2 border-black shadow-inner" style="height: 138px;"></div>
+                                    </div>
+                                </div>
+                                <div class="flex justify-around text-center text-xs sm:text-sm font-bold pt-2 text-white" dir="ltr">
+                                    <div class="w-1/4">1. ציור 🎨</div>
+                                    <div class="w-1/4">2. מוזיקה 🎵</div>
+                                    <div class="w-1/4">3. ספורט ⚽</div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div class="bg-white/80 p-3 rounded border-2 border-gray-500 flex items-center justify-between gap-2">
+                                    <label class="font-bold text-gray-800 text-sm">א. כמה ילדים בחרו בחוג ציור?</label>
+                                    <input type="number" id="q11_a" class="mc-slot w-20 py-2 text-xl" placeholder="?">
+                                </div>
+                                <div class="bg-white/80 p-3 rounded border-2 border-gray-500 flex items-center justify-between gap-2">
+                                    <label class="font-bold text-gray-800 text-sm">ב. כמה ילדים השתתפו בסך הכול?</label>
+                                    <input type="number" id="q11_b" class="mc-slot w-20 py-2 text-xl" placeholder="?">
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'q12_angles_compare':
+                    const anglesSVG = [
+                        { id: 1, label: 'זווית 1', path: 'M 20 70 L 80 70 M 20 70 L 70 40' }, // Acute narrow
+                        { id: 2, label: 'זווית 2', path: 'M 25 70 L 85 70 M 25 70 L 25 15' }, // Right 90
+                        { id: 3, label: 'זווית 3', path: 'M 45 70 L 95 70 M 45 70 L 10 30' }, // Obtuse wide (Largest!)
+                        { id: 4, label: 'זווית 4', path: 'M 25 70 L 85 70 M 25 70 L 60 20' }, // Acute wider
+                        { id: 5, label: 'זווית 5', path: 'M 35 70 L 90 70 M 35 70 L 18 20' }  // Obtuse slight
+                    ];
+                    return `
+                        <div class="space-y-4 text-center">
+                            <p class="font-bold text-gray-800 text-base sm:text-lg">לחצו על הזווית <strong>הגדולה ביותר</strong> מבין חמש הזוויות:</p>
+                            <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+                                ${anglesSVG.map(a => `
+                                    <button onclick="selectQ12(${a.id})" id="q12-btn-${a.id}"
+                                        class="mc-btn p-2 flex flex-col items-center bg-gray-700">
+                                        <span class="text-sm font-black text-yellow-300 mb-1">${a.id}</span>
+                                        <svg viewBox="0 0 105 85" class="w-full h-20 bg-white rounded border-2 border-black">
+                                            <path d="${a.path}" stroke="#111" stroke-width="4" stroke-linecap="round" fill="none"/>
+                                            <circle cx="${a.path.split(' ')[1]}" cy="${a.path.split(' ')[2]}" r="4" fill="#d9534f"/>
+                                        </svg>
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+
+                case 'q13_angle_grid':
+                    return `
+                        <div class="space-y-4">
+                            <p class="font-bold text-gray-800 text-sm sm:text-base">
+                                בכל מסגרת נתונה קרן אחת היוצאת מהנקודה האדומה. <strong>לחצו על נקודה ברשת</strong> כדי למתוח קרן שנייה וליצור את הזווית המבוקשת:
+                            </p>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                                <!-- Grid 1: Acute -->
+                                <div class="mc-panel-dark p-3 flex flex-col items-center">
+                                    <span class="font-black text-cyan-300 mb-1">1. זווית חדה</span>
+                                    <span class="text-xs text-gray-300 mb-2">(קטנה מזווית ישרה)</span>
+                                    <div id="grid-container-1" class="bg-white rounded border-4 border-black p-1"></div>
+                                </div>
+                                <!-- Grid 2: Obtuse -->
+                                <div class="mc-panel-dark p-3 flex flex-col items-center">
+                                    <span class="font-black text-amber-300 mb-1">2. זווית קהה</span>
+                                    <span class="text-xs text-gray-300 mb-2">(גדולה מזווית ישרה)</span>
+                                    <div id="grid-container-2" class="bg-white rounded border-4 border-black p-1"></div>
+                                </div>
+                                <!-- Grid 3: Right -->
+                                <div class="mc-panel-dark p-3 flex flex-col items-center">
+                                    <span class="font-black text-emerald-300 mb-1">3. זווית ישרה</span>
+                                    <span class="text-xs text-gray-300 mb-2">(בדיוק 90 מעלות)</span>
+                                    <div id="grid-container-3" class="bg-white rounded border-4 border-black p-1"></div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'q14_ruler':
+                    return `
+                        <div class="space-y-4">
+                            <p class="font-bold text-gray-800 text-base sm:text-lg">
+                                התבוננו בסרגל שבציור. המספרים מציינים סנטימטרים. מהו אורך העיפרון?
+                            </p>
+
+                            <!-- Visual SVG Ruler & Pencil (2 to 8) -->
+                            <div class="bg-white p-3 sm:p-5 rounded border-4 border-black overflow-x-auto">
+                                <svg viewBox="0 0 650 140" class="w-full min-w-[480px] h-auto" dir="ltr">
+                                    <!-- Pencil starting at x=120 (2cm) to x=420 (8cm) -> scale: 50px per cm, offset 20px -->
+                                    <!-- Eraser -->
+                                    <rect x="120" y="22" width="22" height="26" rx="3" fill="#f472b6" stroke="#111" stroke-width="2.5"/>
+                                    <!-- Metal band -->
+                                    <rect x="142" y="22" width="12" height="26" fill="#cbd5e1" stroke="#111" stroke-width="2.5"/>
+                                    <!-- Pencil Body (Yellow/Gold Minecraft style) -->
+                                    <rect x="154" y="22" width="230" height="26" fill="#facc15" stroke="#111" stroke-width="2.5"/>
+                                    <line x1="154" y1="35" x2="384" y2="35" stroke="#ca8a04" stroke-width="2"/>
+                                    <!-- Wood Tip -->
+                                    <polygon points="384,22 420,35 384,48" fill="#fed7aa" stroke="#111" stroke-width="2.5"/>
+                                    <!-- Graphite Tip -->
+                                    <polygon points="408,30.5 420,35 408,39.5" fill="#1e293b"/>
+
+                                    <!-- Dashed helper lines -->
+                                    <line x1="120" y1="50" x2="120" y2="75" stroke="#ef4444" stroke-width="2" stroke-dasharray="4"/>
+                                    <line x1="420" y1="38" x2="420" y2="75" stroke="#ef4444" stroke-width="2" stroke-dasharray="4"/>
+
+                                    <!-- Ruler Body -->
+                                    <rect x="10" y="75" width="630" height="52" rx="4" fill="#e2e8f0" stroke="#111" stroke-width="3"/>
+                                    ${Array.from({length: 13}, (_, i) => {
+                                        const x = 20 + i * 50;
+                                        return `
+                                            <line x1="${x}" y1="75" x2="${x}" y2="100" stroke="#111" stroke-width="3"/>
+                                            <text x="${x}" y="118" font-size="16" font-weight="bold" text-anchor="middle" fill="#111">${i}</text>
+                                        `;
+                                    }).join('')}
+                                </svg>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div class="bg-white/80 p-3 rounded border-2 border-gray-500 flex items-center justify-between gap-2">
+                                    <label class="font-bold text-gray-800">אורך העיפרון הוא:</label>
+                                    <div class="flex items-center gap-2">
+                                        <input type="number" id="q14_len" class="mc-slot w-20 py-2 text-xl" placeholder="?">
+                                        <span class="font-bold">ס"מ</span>
+                                    </div>
+                                </div>
+                                <div class="bg-white/80 p-3 rounded border-2 border-gray-500 flex items-center justify-between gap-2">
+                                    <label class="font-bold text-gray-800 text-sm">תרגיל החישוב (לדוגמה 8-2):</label>
+                                    <input type="text" id="q14_calc" class="mc-slot w-28 py-2 text-lg" dir="ltr" placeholder="8 - 2">
+                                </div>
+                            </div>
+                        </div>
+                    `;
+            }
+        }
+
+        /* ==========================================================================
+           6. INTERACTIVE WIDGET HANDLERS
+           ========================================================================== */
+        function selectMCQ(optId) {
+            if (state.answeredCurrent) return;
+            playSound('click');
+            tempSelections.mcq = optId;
+            document.querySelectorAll('[id^="mcq-"]').forEach(btn => {
+                btn.classList.remove('mc-btn-diamond');
+                btn.querySelector('.mcq-check').textContent = '⬜';
+            });
+            const selected = document.getElementById(`mcq-${optId}`);
+            selected.classList.add('mc-btn-diamond');
+            selected.querySelector('.mcq-check').textContent = '✅';
+        }
+
+        function selectCompare(sign) {
+            if (state.answeredCurrent) return;
+            playSound('click');
+            tempSelections.compare = sign;
+            document.getElementById('compare-display').textContent = sign;
+        }
+
+        function selectQ8Op(op) {
+            if (state.answeredCurrent) return;
+            playSound('click');
+            tempSelections.q8Op = op;
+            ['plus', 'mult', 'div'].forEach(k => {
+                document.getElementById(`q8-op-${k}`).classList.remove('mc-btn-gold');
+            });
+            document.getElementById(`q8-op-${op}`).classList.add('mc-btn-gold');
+        }
+
+        function selectQ9Op(op) {
+            if (state.answeredCurrent) return;
+            playSound('click');
+            tempSelections.q9Op = op;
+            ['minus', 'mult', 'div'].forEach(k => {
+                document.getElementById(`q9-op-${k}`).classList.remove('mc-btn-gold');
+            });
+            document.getElementById(`q9-op-${op}`).classList.add('mc-btn-gold');
+        }
+
+        function selectQ10(row, sign) {
+            if (state.answeredCurrent) return;
+            playSound('click');
+            tempSelections[`q10_${row}`] = sign;
+            document.getElementById(`q10-disp-${row}`).textContent = sign;
+        }
+
+        function selectQ12(id) {
+            if (state.answeredCurrent) return;
+            playSound('click');
+            tempSelections.q12 = id;
+            for (let i = 1; i <= 5; i++) {
+                document.getElementById(`q12-btn-${i}`).classList.remove('mc-btn-gold');
+            }
+            document.getElementById(`q12-btn-${id}`).classList.add('mc-btn-gold');
+        }
+
+        // Q13: Interactive 3x3 Angle Dot Grids
+        // Given ray: from vertex (col=0, row=1) [middle-left] to target (col=1, row=0) [top-middle] -> angle is -45 deg (45 deg up-right)
+        function initAngleGrids() {
+            tempSelections.grids = { 1: null, 2: null, 3: null };
+            for (let g = 1; g <= 3; g++) {
+                renderSingleGrid(g);
+            }
+        }
+
+        function renderSingleGrid(gridNum) {
+            const container = document.getElementById(`grid-container-${gridNum}`);
+            const coords = [
+                { id: '0,0', x: 25, y: 25 }, { id: '1,0', x: 75, y: 25 }, { id: '2,0', x: 125, y: 25 },
+                { id: '0,1', x: 25, y: 75 }, { id: '1,1', x: 75, y: 75 }, { id: '2,1', x: 125, y: 75 },
+                { id: '0,2', x: 25, y: 125 }, { id: '1,2', x: 75, y: 125 }, { id: '2,2', x: 125, y: 125 }
+            ];
+            const vertex = { x: 25, y: 75 }; // (0,1)
+            const givenEnd = { x: 75, y: 25 }; // (1,0)
+            const chosenId = tempSelections.grids[gridNum];
+            const chosenPt = coords.find(c => c.id === chosenId);
+
+            container.innerHTML = `
+                <svg viewBox="0 0 150 150" class="w-36 h-36 cursor-pointer">
+                    <!-- Given Ray -->
+                    <line x1="${vertex.x}" y1="${vertex.y}" x2="${givenEnd.x}" y2="${givenEnd.y}" stroke="#111" stroke-width="4" stroke-linecap="round"/>
+                    
+                    <!-- User Drawn Ray -->
+                    ${chosenPt ? `
+                        <line x1="${vertex.x}" y1="${vertex.y}" x2="${chosenPt.x}" y2="${chosenPt.y}" stroke="#2563eb" stroke-width="4" stroke-linecap="round"/>
+                    ` : ''}
+
+                    <!-- Dots -->
+                    ${coords.map(pt => {
+                        const isVertex = pt.id === '0,1';
+                        const isGivenEnd = pt.id === '1,0';
+                        const isChosen = pt.id === chosenId;
+                        const clickable = !isVertex && !isGivenEnd;
+                        return `
+                            <circle cx="${pt.x}" cy="${pt.y}" r="${isVertex ? 7 : (isChosen ? 7 : 5.5)}"
+                                fill="${isVertex ? '#ef4444' : (isChosen ? '#2563eb' : '#111')}"
+                                ${clickable ? `onclick="clickGridDot(${gridNum}, '${pt.id}')"` : ''}
+                            />
+                            ${clickable ? `<circle cx="${pt.x}" cy="${pt.y}" r="14" fill="transparent" onclick="clickGridDot(${gridNum}, '${pt.id}')"/>` : ''}
+                        `;
+                    }).join('')}
+                </svg>
+            `;
+        }
+
+        function clickGridDot(gridNum, dotId) {
+            if (state.answeredCurrent) return;
+            playSound('click');
+            tempSelections.grids[gridNum] = dotId;
+            renderSingleGrid(gridNum);
+        }
+
+        /* ==========================================================================
+           7. ANSWER VALIDATION & FEEDBACK
+           ========================================================================== */
+        function checkAnswer() {
+            if (state.answeredCurrent) return;
+            const q = state.activeQuestions[state.currentIndex];
+            let isCorrect = false;
+
+            if (q.type === 'q1_682') {
+                const a = Number(document.getElementById('q1_a').value);
+                const b = Number(document.getElementById('q1_b').value);
+                const c = Number(document.getElementById('q1_c').value);
+                const validC = [628, 268, 286];
+                const okA = a === 692;
+                const okB = b === 582;
+                const okC = validC.includes(c);
+                markInput('q1_a', okA);
+                markInput('q1_b', okB);
+                markInput('q1_c', okC);
+                isCorrect = okA && okB && okC;
+            } else if (q.type === 'mcq') {
+                if (!tempSelections.mcq) return showTempAlert('אנא בחרו אחת מהתשובות!');
+                const chosenObj = q.options.find(o => o.id === tempSelections.mcq);
+                isCorrect = chosenObj && chosenObj.correct;
+            } else if (q.type === 'compare') {
+                if (!tempSelections.compare) return showTempAlert('אנא לחצו על אחד הסימנים: < , = או >');
+                isCorrect = tempSelections.compare === q.correctSign;
+            } else if (q.type === 'q4_sequences') {
+                const a1 = Number(document.getElementById('q4_a1').value);
+                const a2 = Number(document.getElementById('q4_a2').value);
+                const a3 = Number(document.getElementById('q4_a3').value);
+                const b1 = Number(document.getElementById('q4_b1').value);
+                const b2 = Number(document.getElementById('q4_b2').value);
+                const b3 = Number(document.getElementById('q4_b3').value);
+
+                const oka1 = a1 === 456, oka2 = a2 === 466, oka3 = a3 === 476;
+                const okb1 = b1 === 600, okb2 = b2 === 520, okb3 = b3 === 500;
+                markInput('q4_a1', oka1); markInput('q4_a2', oka2); markInput('q4_a3', oka3);
+                markInput('q4_b1', okb1); markInput('q4_b2', okb2); markInput('q4_b3', okb3);
+                isCorrect = oka1 && oka2 && oka3 && okb1 && okb2 && okb3;
+            } else if (q.type === 'q5_digits') {
+                const vals = [1, 2, 3, 4].map(i => Number(document.getElementById(`q5_${i}`).value));
+                const validSet = [407, 470, 704, 740];
+                const unique = new Set(vals);
+                let allValid = true;
+                vals.forEach((v, idx) => {
+                    const ok = validSet.includes(v);
+                    markInput(`q5_${idx + 1}`, ok);
+                    if (!ok) allValid = false;
+                });
+                isCorrect = allValid && unique.size === 4;
+            } else if (q.type === 'q6_calc') {
+                const answers = { c1: 578, c2: 1113, c3: 360, c4: 614, c5: 48 };
+                let allOk = true;
+                for (const [key, expected] of Object.entries(answers)) {
+                    const val = Number(document.getElementById(`q6_${key}`).value);
+                    const ok = val === expected;
+                    markInput(`q6_${key}`, ok);
+                    if (!ok) allOk = false;
+                }
+                isCorrect = allOk;
+            } else if (q.type === 'q7_unknowns') {
+                const answers = { 1: 7, 2: 5, 3: 152, 4: 300, 5: 54 };
+                let allOk = true;
+                for (const [key, expected] of Object.entries(answers)) {
+                    const val = Number(document.getElementById(`q7_${key}`).value);
+                    const ok = val === expected;
+                    markInput(`q7_${key}`, ok);
+                    if (!ok) allOk = false;
+                }
+                isCorrect = allOk;
+            } else if (q.type === 'q8_stickers') {
+                if (!tempSelections.q8Op) return showTempAlert('אנא בחרו קודם את התרגיל המתאים!');
+                const total = Number(document.getElementById('q8_total').value);
+                const okOp = tempSelections.q8Op === 'mult';
+                const okTot = total === 96;
+                markInput('q8_total', okTot);
+                isCorrect = okOp && okTot;
+            } else if (q.type === 'q9_cookies') {
+                if (!tempSelections.q9Op) return showTempAlert('אנא בחרו קודם את התרגיל המתאים!');
+                const bags = Number(document.getElementById('q9_bags').value);
+                const okOp = tempSelections.q9Op === 'div';
+                const okBags = bags === 6;
+                markInput('q9_bags', okBags);
+                isCorrect = okOp && okBags;
+            } else if (q.type === 'q10_mult_compare') {
+                if (!tempSelections.q10_1 || !tempSelections.q10_2) return showTempAlert('אנא השלימו את שני הסימנים!');
+                isCorrect = tempSelections.q10_1 === '=' && tempSelections.q10_2 === '>';
+            } else if (q.type === 'q11_chart') {
+                const a = Number(document.getElementById('q11_a').value);
+                const b = Number(document.getElementById('q11_b').value);
+                const okA = a === 8;
+                const okB = b === 24;
+                markInput('q11_a', okA);
+                markInput('q11_b', okB);
+                isCorrect = okA && okB;
+            } else if (q.type === 'q12_angles_compare') {
+                if (!tempSelections.q12) return showTempAlert('אנא לחצו על הזווית הגדולה ביותר!');
+                isCorrect = tempSelections.q12 === 3;
+            } else if (q.type === 'q13_angle_grid') {
+                const g = tempSelections.grids;
+                if (!g[1] || !g[2] || !g[3]) return showTempAlert('אנא בחרו נקודה בכל אחת משלוש המסגרות!');
+                // Given ray is vector (1, -1) [45 deg up-right]
+                // Acute (< 90 deg): '0,0' (45 deg), '1,1' (45 deg), '2,1' (26.5 deg), '2,0' (18.4 deg)
+                // Right (= 90 deg): '1,2' (vector (1, 1) -> dot product 1*1 + (-1)*1 = 0!)
+                // Obtuse (> 90 deg): '0,2' (vector (0, 1) -> 135 deg)
+                const acuteValid = ['0,0', '1,1', '2,1', '2,0'];
+                const obtuseValid = ['0,2'];
+                const rightValid = ['1,2'];
+                isCorrect = acuteValid.includes(g[1]) && obtuseValid.includes(g[2]) && rightValid.includes(g[3]);
+            } else if (q.type === 'q14_ruler') {
+                const len = Number(document.getElementById('q14_len').value);
+                const okLen = len === 6;
+                markInput('q14_len', okLen);
+                isCorrect = okLen;
+            }
+
+            // Lock question & show result
+            state.answeredCurrent = true;
+            state.results.push({ id: q.id, title: q.title, correct: isCorrect });
+
+            const feedbackBox = document.getElementById('feedback-box');
+            const feedbackHeader = document.getElementById('feedback-header');
+            feedbackBox.classList.remove('hidden');
+
+            if (isCorrect) {
+                playSound('xp');
+                spawnXPParticles('+100 XP 💎');
+                state.score += 1;
+                state.xp += 100;
+                feedbackBox.classList.add('bg-emerald-200', 'border-emerald-700');
+                feedbackHeader.innerHTML = `<span class="text-2xl">🎉</span> <span class="text-emerald-900">כל הכבוד ${state.character.name}! תשובה מדויקת! (+1 אמרלד)</span>`;
+            } else {
+                playSound('wrong');
+                document.getElementById('question-card').classList.add('animate-shake');
+                state.xp += 25; // Effort XP
+                feedbackBox.classList.add('bg-red-200', 'border-red-700');
+                feedbackHeader.innerHTML = `<span class="text-2xl">💥</span> <span class="text-red-900">כמעט! בואו נלמד מההסבר למטה ונמשיך הלאה:</span>`;
+            }
+
+            updateHUD();
+            document.getElementById('btn-check').classList.add('hidden');
+            const nextBtn = document.getElementById('btn-next');
+            nextBtn.classList.remove('hidden');
+            if (state.currentIndex === state.activeQuestions.length - 1) {
+                nextBtn.innerHTML = '🏆 סיום הרפתקה וצפייה בפרסים!';
+            }
+        }
+
+        function markInput(id, isOk) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.disabled = true;
+            el.classList.add(isOk ? 'correct' : 'wrong');
+        }
+
+        function showTempAlert(msg) {
+            playSound('wrong');
+            const existing = document.getElementById('temp-toast');
+            if (existing) existing.remove();
+            const toast = document.createElement('div');
+            toast.id = 'temp-toast';
+            toast.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 bg-red-600 text-white font-bold px-5 py-3 rounded border-4 border-black shadow-xl z-50 text-sm sm:text-base';
+            toast.textContent = '⚠️ ' + msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2500);
+        }
+
+        function nextQuestion() {
+            playSound('click');
+            state.currentIndex++;
+            if (state.currentIndex < state.activeQuestions.length) {
+                renderQuestion();
+            } else {
+                renderSummaryScreen();
+            }
+        }
+
+        /* ==========================================================================
+           8. SUMMARY / VICTORY SCREEN
+           ========================================================================== */
+        function renderSummaryScreen() {
+            playSound('levelup');
+            document.getElementById('xp-bar-fill').style.width = '100%';
+            document.getElementById('hud-world-name').textContent = 'המשימה הושלמה בהצלחה!';
+            const total = state.activeQuestions.length;
+            const correctCount = state.results.filter(r => r.correct).length;
+            const pct = Math.round((correctCount / total) * 100);
+
+            let rankTitle = 'חוצב מתחיל 🪨';
+            let rankBadge = '🥉';
+            if (pct >= 90) { rankTitle = 'מאסטר יהלומים ואמרלדים! 💎'; rankBadge = '👑'; }
+            else if (pct >= 70) { rankTitle = 'אביר זהב מנוסה! ⚔️'; rankBadge = '🥇'; }
+            else if (pct >= 50) { rankTitle = 'חוקר ברזל אמיץ! 🛡️'; rankBadge = '🥈'; }
+
+            const container = document.getElementById('game-container');
+            container.innerHTML = `
+                <div class="mc-panel p-6 sm:p-8 text-center space-y-6">
+                    <div class="text-5xl sm:text-6xl animate-block">${rankBadge}</div>
+                    <div class="space-y-1">
+                        <h2 class="text-2xl sm:text-4xl font-black text-gray-900">כל הכבוד, ${state.character.name}!</h2>
+                        <p class="text-lg sm:text-xl font-bold text-emerald-800">הדרגה שלך: ${rankTitle}</p>
+                    </div>
+
+                    <!-- Stats Summary Cards -->
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="mc-panel-dark p-3">
+                            <div class="text-xs text-gray-300">תשובות נכונות</div>
+                            <div class="text-2xl sm:text-3xl font-black text-emerald-400">${correctCount} / ${total}</div>
+                        </div>
+                        <div class="mc-panel-dark p-3">
+                            <div class="text-xs text-gray-300">אמרלדים 💎</div>
+                            <div class="text-2xl sm:text-3xl font-black text-cyan-300">${state.score}</div>
+                        </div>
+                        <div class="mc-panel-dark p-3">
+                            <div class="text-xs text-gray-300">נקודות ניסיון</div>
+                            <div class="text-2xl sm:text-3xl font-black text-lime-400">${state.xp} XP</div>
+                        </div>
+                    </div>
+
+                    <!-- Breakdown List -->
+                    <div class="text-right bg-white/80 rounded border-4 border-gray-500 p-4 max-h-60 overflow-y-auto space-y-2">
+                        <h3 class="font-extrabold text-gray-800 border-b-2 border-gray-300 pb-1">סיכום השאלות שתרגלת:</h3>
+                        ${state.results.map(r => `
+                            <div class="flex items-center justify-between text-sm py-1 border-b border-gray-200">
+                                <span class="font-semibold text-gray-800">${r.title}</span>
+                                <span class="font-bold ${r.correct ? 'text-emerald-700' : 'text-red-600'}">
+                                    ${r.correct ? '✔️ הצלחה' : '🔄 כדאי לתרגל שוב'}
+                                </span>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="flex flex-wrap justify-center gap-4 pt-2">
+                        <button onclick="startGame(state.mode)" class="mc-btn mc-btn-green px-6 py-3.5 text-lg">
+                            🔄 שחק שוב באותו שלב
+                        </button>
+                        <button onclick="goHome()" class="mc-btn mc-btn-gold px-6 py-3.5 text-lg">
+                            🏠 חזרה למסך העולמות
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Start App on Window Load
+        window.onload = function() {
+            renderStartScreen();
+        };
+    </script>
+</body>
+</html>
